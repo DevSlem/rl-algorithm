@@ -4,6 +4,7 @@ import numpy as np
 class WindyGridworld:
     def __init__(self) -> None:
         self.obs_shape = (7, 10)
+        self.action_count = 4
         
         # wind setting
         self.wind = np.zeros(self.obs_shape + (2,), dtype=np.int32)
@@ -14,11 +15,26 @@ class WindyGridworld:
         self.reset()
         self.goal_state = np.array([3, 7], dtype=np.int32) # goal state
         
-    def reset(self):
+    def reset(self) -> np.ndarray:
+        """ Reset the environment.
+
+        Returns:
+            np.ndarray: start state
+        """
         self.state = np.array([3, 0], dtype=np.int32) # start state
+        return self.state
         
         
     def step(self, action: int) -> Tuple[np.ndarray, float, bool]:
+        """ Move to next step.
+
+        Args:
+            action (int): 0: up, 1: right, 2: down, 3: left
+
+        Returns:
+            Tuple[np.ndarray, float, bool]: next state, reward, terminated
+        """
+        
         self.move(action)
         terminated = (self.state == self.goal_state).sum() == 2
         reward = 0 if terminated else -1
@@ -26,7 +42,7 @@ class WindyGridworld:
         return self.state, reward, terminated
     
     def convert_to_move(self, action: int) -> np.ndarray:
-        assert action >= 0 and action <= 3
+        assert action >= 0 and action < self.action_count
         temp = None
         if action == 0: # up
             temp = [-1, 0]
