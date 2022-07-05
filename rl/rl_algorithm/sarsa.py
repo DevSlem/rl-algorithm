@@ -1,16 +1,9 @@
-from dataclasses import dataclass
 from typing import List, Tuple
+from transition import Transition
 import numpy as np
 import random
 
-@dataclass(frozen=True)
-class Transition:
-    current_state: Tuple
-    current_action: int
-    next_state: Tuple
-    reward: float
-
-class QLearning:
+class Sarsa:
     def __init__(self, state_shape: Tuple, action_count: int, terminal_states: List[Tuple], epsilon = 0.1) -> None:
         
         self.action_count = action_count
@@ -22,27 +15,33 @@ class QLearning:
         # Q(terminal, :) = 0
         for terminal in terminal_states:
             self.Q[terminal] = 0
-            
-            
-    def update(self, transition: Transition, alpha = 0.1, gamma = 0.9) -> None:
-        """ Update q-values with q-learing.
+    
+    def update(self, transition: Transition, alpha = 0.1, gamma = 0.1) -> int:
+        """ Update q-values with sarsa.
 
         Args:
             transition (Transition): transition data
             alpha (float, optional): step size. Defaults to 0.1.
-            gamma (float, optional): discount factor. Defaults to 0.9.
+            gamma (float, optional): discount factor. Defaults to 0.1.
+
+        Returns:
+            int: next action - on policy method
         """
         
-        # get maximum q-value in next state
-        target_q = np.max(self.Q[transition.next_state]) 
+        # Compute td error
+        next_action = self.get_action(transition.next_state)
         
-        # compute td error
-        td_error = transition.reward + gamma * target_q - self.Q[transition.current_state][transition.current_action]
-        
-        # update q-value
+        td_error = (
+            transition.reward + 
+            gamma * self.Q[transition.next_state][next_action] - 
+            self.Q[transition.current_state][transition.current_action]
+        )
+
+        # Update action value
         self.Q[transition.current_state][transition.current_action] += alpha * td_error
-            
-            
+        
+        return next_action
+        
     def get_action(self, state: Tuple) -> int:
         """Get action from epsilon greedy policy.
 
@@ -52,7 +51,7 @@ class QLearning:
         Returns:
             int: action
         """
-    
+        
         p = random.random()
         if p > self.epsilon:
             return np.argmax(self.Q[state])
