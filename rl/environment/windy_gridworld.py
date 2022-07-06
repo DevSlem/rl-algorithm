@@ -12,8 +12,10 @@ class WindyGridworld:
         self.wind[:, 6:8, 0] = -2
         self.wind[:, 8, 0] = -1
         
-        self.reset()
+        self.start_state = np.array([3, 0], dtype=np.int32) # start state
         self.goal_state = np.array([3, 7], dtype=np.int32) # goal state
+        
+        self.reset()
         
     def reset(self) -> np.ndarray:
         """ Reset the environment.
@@ -21,8 +23,8 @@ class WindyGridworld:
         Returns:
             np.ndarray: start state
         """
-        self.state = np.array([3, 0], dtype=np.int32) # start state
-        return self.state
+        self.state = self.start_state.copy()
+        return self.state.copy()
         
         
     def step(self, action: int) -> Tuple[np.ndarray, float, bool]:
@@ -39,7 +41,7 @@ class WindyGridworld:
         terminated = (self.state == self.goal_state).sum() == 2
         reward = 0 if terminated else -1
         
-        return self.state, reward, terminated
+        return self.state.copy(), reward, terminated
     
     def convert_to_move(self, action: int) -> np.ndarray:
         assert action >= 0 and action < self.action_count

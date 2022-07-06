@@ -6,22 +6,22 @@ class CliffWalking:
     def __init__(self) -> None:
         self.obs_shape = (4, 12)
         self.action_count = 4
-        self.start_state = (self.obs_shape[0] - 1, 0)
-        self.goal_state = (self.obs_shape[0] - 1, self.obs_shape[1] - 1)
+        self.start_state = np.array([self.obs_shape[0] - 1, 0], dtype=np.int32)
+        self.goal_state = np.array([self.obs_shape[0] - 1, self.obs_shape[1] - 1], dtype=np.int32)
         
         self.reset()
         
-    def reset(self) -> Tuple:
+    def reset(self) -> np.ndarray:
         """ Reset the environment.
 
         Returns:
             Tuple: start state
         """
         
-        self.state = np.array(self.start_state, dtype=np.int32)
-        return self.start_state
+        self.state = self.start_state.copy()
+        return self.state.copy()
         
-    def step(self, action: int) -> Tuple[Tuple, float, bool]:
+    def step(self, action: int) -> Tuple[np.ndarray, float, bool]:
         """ Move to next step.
 
         Args:
@@ -41,7 +41,7 @@ class CliffWalking:
             reward = 0.0
             terminated = True
             
-        return tuple(self.state), reward, terminated
+        return self.state.copy(), reward, terminated
     
     def move(self, action: int):
         move = self.convert_to_move(action)
