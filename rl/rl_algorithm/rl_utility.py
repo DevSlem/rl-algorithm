@@ -9,6 +9,7 @@ def epsilon_greedy(q_values, state: Tuple, action_count: int, epsilon = 0.1) -> 
     else:
         return random.randint(0, action_count - 1)
     
+    
 def average_last_data(data_list, data_count: int = -1) -> list:
     """ Returns a list containing averaged values of last n data from the data list.
 

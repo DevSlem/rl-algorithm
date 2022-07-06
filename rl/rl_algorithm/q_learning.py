@@ -17,40 +17,17 @@ class QLearning:
         self.gamma = gamma
         
         shape = state_shape + (action_count,)
-        # Initialize action value q(s,a) for all state-action pairs (arbitrarily)
-        self.Q: np.ndarray = np.zeros(shape=shape) #np.random.normal(0, 1, size=shape)
-        # Q(terminal, :) = 0
-        for terminal in terminal_states:
-            self.Q[terminal] = 0
+        self.Q: np.ndarray = np.zeros(shape=shape)
             
             
-    def update(self, transition: Transition) -> None:
-        """ Update q-values with q-learing.
-
-        Args:
-            transition (Transition): transition data
-            alpha (float, optional): step size. Defaults to 0.1.
-            gamma (float, optional): discount factor. Defaults to 0.9.
-        """
-        
+    def update(self, transition: Transition) -> None:       
         # get maximum q-value in next state
         target_q = np.max(self.Q[transition.next_state]) 
-        
         # compute td error
         td_error = transition.reward + self.gamma * target_q - self.Q[transition.current_state][transition.current_action]
-        
         # update q-value
         self.Q[transition.current_state][transition.current_action] += self.alpha * td_error
             
             
-    def get_action(self, state: Tuple) -> int:
-        """Get action from epsilon greedy policy.
-
-        Args:
-            state (Tuple): q-table state index
-
-        Returns:
-            int: action
-        """
-    
+    def get_action(self, state: Tuple) -> int: 
         return rl_utility.epsilon_greedy(self.Q, state, self.action_count, self.epsilon)

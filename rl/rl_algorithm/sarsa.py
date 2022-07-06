@@ -23,39 +23,22 @@ class Sarsa:
         for terminal in terminal_states:
             self.Q[terminal] = 0
     
-    def update(self, transition: Transition) -> int:
-        """ Update q-values with sarsa.
-
-        Args:
-            transition (Transition): transition data
-            alpha (float, optional): step size. Defaults to 0.1.
-            gamma (float, optional): discount factor. Defaults to 0.1.
-
-        Returns:
-            int: next action - on policy method
-        """
-        
-        # Compute td error
+    
+    def update(self, transition: Transition) -> int:  
+        # get next aciton from current policy
         next_action = self.get_action(transition.next_state)
-        
+        # compute td error
         td_error = (
             transition.reward + 
             self.gamma * self.Q[transition.next_state][next_action] - 
             self.Q[transition.current_state][transition.current_action]
         )
-
-        # Update action value
+        # update q-value
         self.Q[transition.current_state][transition.current_action] += self.alpha * td_error
         
+        # return next action
         return next_action
         
+        
     def get_action(self, state: Tuple) -> int:
-        """Get action from epsilon greedy policy.
-
-        Args:
-            state (Tuple): q-table state index
-
-        Returns:
-            int: action
-        """
         return rl_utility.epsilon_greedy(self.Q, state, self.action_count, self.epsilon)
