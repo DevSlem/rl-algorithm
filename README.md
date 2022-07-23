@@ -4,10 +4,13 @@ It's a repository where i share reinforcement learning algorithms and some envir
 
 ## Development Environment
 
-* Python 3.7.13
-* Pytorch 1.11.0 / CUDA 11.3
+Create an anaconda environment using this command:
 
-> Note: Don't install PyTorch **cpuonly** version. If so, you may not be able to use cuda.
+```
+conda env create -f conda_env.yaml
+```
+
+If you want to change the environment name, change the value of `name` field, currently `rl-algorithm` value, in `conda_env.yaml` file.
 
 ## Structure
 
