@@ -1,43 +1,45 @@
 from typing import List, Tuple
-from rl import Transition, epsilon_greedy
-import numpy as np
+from rl import TabularQAgent, Transition, epsilon_greedy
 
-class Sarsa:
-    def __init__(self, state_shape: Tuple, 
+class Sarsa(TabularQAgent):
+    def __init__(self, obs_shape: tuple, 
                  action_count: int, 
-                 terminal_states: List[Tuple], 
+                 terminal_states: List[Tuple] = None, 
                  epsilon = 0.1,
                  alpha = 0.1,
                  gamma = 0.9) -> None:
-        
-        self.action_count = action_count
+        super().__init__(obs_shape, action_count, terminal_states)
         self.epsilon = epsilon
         self.alpha = alpha
-        self.gamma = gamma
+        self.gamma = gamma  
+        self.cur_transition = None # current transition to update q values for it
         
-        shape = state_shape + (action_count,)
-        # Initialize action value q(s,a) for all state-action pairs (arbitrarily)
-        self.Q: np.ndarray = np.zeros(shape=shape) #np.random.normal(0, 1, size=shape)
-        # Q(terminal, :) = 0
-        for terminal in terminal_states:
-            self.Q[terminal] = 0
+    def start_episode(self):
+        self.cur_transition = None
     
-    
-    def update(self, transition: Transition) -> int:  
-        # get next aciton from current policy
-        next_action = self.get_action(transition.next_state)
+    def update(self, transition: Transition):
+        # if you don't have a next action, skip the update rule until the next update call
+        if self.cur_transition is None:
+            self.cur_transition = transition.to_tabular()
+            pass
+        
+        Q = self._Q
+        transition = transition.to_tabular() # next transition
+        
+        # get a next aciton that follows the current policy
+        next_action = transition.current_action
         # compute td error
         td_error = (
-            transition.reward + 
-            self.gamma * self.Q[transition.next_state][next_action] - 
-            self.Q[transition.current_state][transition.current_action]
+            self.cur_transition.reward + 
+            self.gamma * Q[self.cur_transition.next_state][next_action] - 
+            Q[self.cur_transition.current_state][self.cur_transition.current_action]
         )
         # update q-value
-        self.Q[transition.current_state][transition.current_action] += self.alpha * td_error
+        Q[self.cur_transition.current_state][self.cur_transition.current_action] += self.alpha * td_error
         
-        # return next action
-        return next_action
+        # update the current transition
+        self.cur_transition = transition
         
-        
-    def get_action(self, state: Tuple) -> int:
-        return epsilon_greedy(self.Q, state, self.action_count, self.epsilon)
+    def get_action(self, state) -> int:
+        return epsilon_greedy(self._Q, tuple(state), self.action_count, self.epsilon)
+    
