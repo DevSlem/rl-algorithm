@@ -1,4 +1,16 @@
+import torch
+import random
+import torch.backends.cudnn as cudnn
 import numpy as np
+
+def seed(value):
+    torch.manual_seed(value)
+    torch.cuda.manual_seed(value)
+    torch.cuda.manual_seed_all(value)
+    np.random.seed(value)
+    cudnn.benchmark = False
+    cudnn.deterministic = True
+    random.seed(value)
 
 def average_last_data(data_list, data_count: int = -1) -> list:
     """ Returns a list containing averaged values of last n data from the data list.

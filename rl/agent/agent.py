@@ -9,19 +9,15 @@ class Agent(metaclass=ABCMeta):
         pass
     
     def start_episode(self) -> Any:
-        """ Call this method before episode start. """
+        """ Call this method before the start of an episode when training. """
         pass
     
     @abstractmethod
     def update(self, transition: rl.Transition) -> Any:
-        """ Update the agent. """
+        """ Update the agent when training. """
         pass
     
     def end_episode(self) -> Any:
-        """ Call this method after episode end. """
-        pass
-    
-    @abstractmethod
-    def reset(self) -> Any:
+        """ Call this method after the end of an episode when training. """
         pass
     
