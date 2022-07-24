@@ -1,31 +1,7 @@
-from abc import *
-from typing import Any, List, Tuple
-import rl
+from typing import List, Tuple
+from rl.agent import Agent
 import numpy as np
 
-class Agent(metaclass=ABCMeta):
-    @abstractmethod
-    def get_action(self, state) -> Any:
-        """ Returns an action that follows the behavior policy. """
-        pass
-    
-    def start_episode(self):
-        """ Call this method before episode start. """
-        pass
-    
-    @abstractmethod
-    def update(self, transition: rl.Transition) -> Any:
-        """ Update the agent. """
-        pass
-    
-    def end_episode(self):
-        """ Call this method after episode end. """
-        pass
-    
-    @abstractmethod
-    def reset(self) -> None:
-        pass
-    
 class TabularQAgent(Agent):
     def __init__(self, obs_shape: tuple, 
                  action_count: int, 
