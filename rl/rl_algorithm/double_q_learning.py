@@ -1,7 +1,6 @@
 from typing import List
 import numpy as np
-from transition import Transition
-import rl_utility
+from rl import Transition, epsilon_greedy
 import random
 
 class DoubleQLearning:
@@ -51,4 +50,4 @@ class DoubleQLearning:
         
         
     def get_action(self, state: tuple) -> int:
-        return rl_utility.epsilon_greedy(self.Q1 + self.Q2, state, self.action_count, self.epsilon)
+        return epsilon_greedy(self.Q1 + self.Q2, state, self.action_count, self.epsilon)

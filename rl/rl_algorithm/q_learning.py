@@ -1,7 +1,7 @@
 from typing import List, Tuple
-from transition import Transition
+from rl import Transition, epsilon_greedy
 import numpy as np
-import rl_utility
+
 
 class QLearning:
     def __init__(self, state_shape: Tuple, 
@@ -30,4 +30,4 @@ class QLearning:
             
             
     def get_action(self, state: Tuple) -> int: 
-        return rl_utility.epsilon_greedy(self.Q, state, self.action_count, self.epsilon)
+        return epsilon_greedy(self.Q, state, self.action_count, self.epsilon)

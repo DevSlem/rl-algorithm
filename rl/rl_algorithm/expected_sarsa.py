@@ -1,6 +1,5 @@
 from typing import List
-from transition import Transition
-import rl_utility
+from rl import Transition, epsilon_greedy
 import numpy as np
 
 class ExpectedSarsa:
@@ -41,4 +40,4 @@ class ExpectedSarsa:
     
     
     def get_action(self, state: tuple) -> int:
-        return rl_utility.epsilon_greedy(self.Q, state, self.action_count, self.epsilon)
+        return epsilon_greedy(self.Q, state, self.action_count, self.epsilon)
