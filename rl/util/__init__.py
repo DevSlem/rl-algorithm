@@ -2,6 +2,8 @@ import torch
 import random
 import torch.backends.cudnn as cudnn
 import numpy as np
+import os
+import datetime
 
 def seed(value):
     torch.manual_seed(value)
@@ -34,3 +36,17 @@ def average_last_data(data_list, data_count: int = -1) -> list:
         averages.append(np.mean(data_list[s:e]))
         
     return averages
+
+def add_datetime_suffix(basename: str, delimiter: str = '_') -> str:
+    """ Add a datetime suffix wtih delimiter to the basename. (e.g. basename_220622_140322) """
+    suffix = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+    return delimiter.join([basename, suffix])
+
+def create_dir(directory):
+    """ If there's no directory, create it. """
+    try:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+    except OSError:
+        print("Error: Failed to create the directory.")
+        
