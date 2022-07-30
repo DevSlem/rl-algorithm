@@ -43,7 +43,7 @@ class DoubleQLearning(TabularQAgent):
             # compute td error
             td_error = (
                 transition.reward +
-                self.gamma * Q2[transition.next_state][greedy_action] - # get Q2 given greedy action for Q1
+                self.gamma * (1 - transition.terminated) * Q2[transition.next_state][greedy_action] - # get Q2 given greedy action for Q1
                 Q1[transition.current_state][transition.current_action]
             )
             # update Q1
@@ -55,7 +55,7 @@ class DoubleQLearning(TabularQAgent):
             # compute td error
             td_error = (
                 transition.reward +
-                self.gamma * Q1[transition.next_state][greedy_action] - # get Q1 given greedy action for Q2
+                self.gamma * (1 - transition.terminated) * Q1[transition.next_state][greedy_action] - # get Q1 given greedy action for Q2
                 Q2[transition.current_state][transition.current_action]
             )
             # update Q2

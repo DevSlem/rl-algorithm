@@ -24,7 +24,7 @@ class ExpectedSarsa(TabularQAgent):
         # compute expected q
         expected_q = np.average(self.Q[transition.next_state], weights=policy_distribution)
         # compute td error
-        td_error = transition.reward + self.gamma * expected_q - self.Q[transition.current_state][transition.current_action]
+        td_error = transition.reward + self.gamma * (1 - transition.terminated) * expected_q - self.Q[transition.current_state][transition.current_action]
         # update q-values
         self.Q[transition.current_state][transition.current_action] += self.alpha * td_error
     

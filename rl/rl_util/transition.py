@@ -9,13 +9,15 @@ class Transition:
     current_action: Any
     next_state: Any
     reward: float
+    terminated: bool
     
     def to_tabular(self):
         transition = Transition(
             tuple(self.current_state),
             int(self.current_action),
             tuple(self.next_state),
-            self.reward
+            self.reward,
+            self.terminated
         )
         return transition
     
@@ -24,7 +26,8 @@ class Transition:
             np.array(self.current_state),
             np.array(self.current_action),
             np.array(self.next_state),
-            np.array(self.reward)
+            np.array(self.reward),
+            self.terminated
         )
         return transition
     
@@ -33,6 +36,7 @@ class Transition:
             torch.tensor(self.current_state, device=device, requires_grad=requires_grad),
             torch.tensor(self.current_action, device=device, requires_grad=requires_grad),
             torch.tensor(self.next_state, device=device, requires_grad=requires_grad),
-            torch.tensor(self.reward, device=device, requires_grad=requires_grad)
+            torch.tensor(self.reward, device=device, requires_grad=requires_grad),
+            self.terminated
         )
         return transition
