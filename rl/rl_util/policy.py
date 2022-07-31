@@ -1,5 +1,7 @@
 from typing import Tuple
 import numpy as np
+import torch
+import torch.nn as nn
 
 def epsilon_greedy(q_values, state: Tuple, action_count: int, epsilon = 0.1) -> int:
     p = np.random.rand()
@@ -7,7 +9,16 @@ def epsilon_greedy(q_values, state: Tuple, action_count: int, epsilon = 0.1) -> 
         return np.argmax(q_values[state])
     else:
         return np.random.randint(action_count)
-
+    
+def epsilon_greedy_dnn(q_value_net: nn.Module, state: torch.Tensor, action_count: int, epsilon=0.1):
+    """ Get an action from epsilon greedy policy using dnn. """
+    if np.random.rand() > epsilon:
+        with torch.no_grad():
+            q_values = q_value_net(state)
+            return torch.argmax(q_values, dim=1).cpu().detach().numpy()
+    else:
+        return np.random.randint(action_count, size=state.shape[0])
+    
 def epsilon_greedy_distribution(q_values, 
                                 state: Tuple, 
                                 action_count: int, 

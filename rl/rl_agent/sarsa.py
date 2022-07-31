@@ -31,7 +31,7 @@ class Sarsa(TabularQAgent):
         # compute td error
         td_error = (
             self.cur_transition.reward + 
-            self.gamma * Q[self.cur_transition.next_state][next_action] - 
+            self.gamma * (1 - transition.terminated) * Q[self.cur_transition.next_state][next_action] - 
             Q[self.cur_transition.current_state][self.cur_transition.current_action]
         )
         # update q-value

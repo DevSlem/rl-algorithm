@@ -41,7 +41,7 @@ class TabularQAgent(Agent):
     def set_terminal_states(self, terminal_states: List[Tuple]) -> None:
         assert terminal_states is not None
         
-        self.__terminal_states = terminal_states
+        self._terminal_states = terminal_states
         for s in terminal_states:
             self._Q[s] = 0
             

@@ -1,3 +1,5 @@
+from .decay import *
+
 import torch
 import random
 import torch.backends.cudnn as cudnn

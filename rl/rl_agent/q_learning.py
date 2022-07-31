@@ -22,7 +22,7 @@ class QLearning(TabularQAgent):
         # get maximum q-value in next state
         target_q = np.max(Q[transition.next_state]) 
         # compute td error
-        td_error = transition.reward + self.gamma * target_q - Q[transition.current_state][transition.current_action]
+        td_error = transition.reward + self.gamma * (1 - transition.terminated) * target_q - Q[transition.current_state][transition.current_action]
         # update q-value
         Q[transition.current_state][transition.current_action] += self.alpha * td_error
             
