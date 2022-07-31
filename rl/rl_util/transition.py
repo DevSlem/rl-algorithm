@@ -1,7 +1,7 @@
+from __future__ import annotations
 from typing import Any, List, NamedTuple
 import numpy as np
 import torch
-from __future__ import annotations
 
 class Transition(NamedTuple):
     current_state: Any
@@ -56,7 +56,7 @@ class Transition(NamedTuple):
             terminated_arr.append(transition.terminated)
             
         current_states = torch.tensor(np.array(current_states), device=device, requires_grad=requires_grad)
-        current_actions = torch.stack(np.array(current_actions), device=device, requires_grad=requires_grad)
+        current_actions = torch.tensor(np.array(current_actions), device=device, requires_grad=requires_grad)
         next_states = torch.tensor(np.array(next_states), device=device, requires_grad=requires_grad)
         rewards = torch.tensor(rewards, device=device, requires_grad=requires_grad)
         terminated_arr = torch.tensor(terminated_arr, device=device, requires_grad=requires_grad).int()

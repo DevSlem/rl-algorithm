@@ -4,24 +4,26 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 from rl import Transition, Agent, epsilon_greedy_dnn, OnPolicyReplay
+from rl.util import Decay, NoDecay
 
 class DeepSarsa(Agent):
     def __init__(self,
                  q_value_net: nn.Module,
                  optimizer: optim.Optimizer,
                  action_count: int,
-                 loss_func = None,
+                 loss_func = nn.MSELoss(),
+                 onpolicy_replay: OnPolicyReplay = OnPolicyReplay(32),
+                 epsilon_decay: Decay = NoDecay(0.1),
                  gamma = 0.99,
-                 epsilon = 0.1,
-                 batch_size = 32,
                  device: torch.device = None) -> None:
         self.q_value_net = q_value_net
         self.optimizer = optimizer
         self.action_count = action_count
-        self.loss_func = nn.MSELoss if loss_func is None else loss_func
+        self.loss_func = loss_func
+        self.onpolicy_replay = onpolicy_replay
+        self.epsilon_decay = epsilon_decay
         self.gamma = gamma
-        self.epsilon = epsilon
-        self.onpolicy_replay = OnPolicyReplay(batch_size)
+        self.epsilon = epsilon_decay.step()
         self.device = device
         
     def update(self, transition: Transition) -> Any:
@@ -35,7 +37,8 @@ class DeepSarsa(Agent):
             )
             # get a next action from the next transition
             next_actions = torch.cat(
-                [current_actions[1:], transition.to_tensor(self.device).current_action]
+                [current_actions[1:], 
+                 transition.to_tensor(self.device).current_action.unsqueeze(0)]
             )
             # compute td loss
             loss = self.compute_td_loss(
@@ -50,6 +53,9 @@ class DeepSarsa(Agent):
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            
+            # set epsilon
+            self.epsilon = self.epsilon_decay.step()
             
         # add new transition
         self.onpolicy_replay.add(transition)
