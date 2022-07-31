@@ -1,9 +1,9 @@
-from typing import Any, Tuple
+from typing import Any
 import torch
 import torch.nn as nn
 import torch.optim as optim
 import numpy as np
-from rl import Transition, Agent, epsilon_greedy_dnn
+from rl import Transition, Agent, epsilon_greedy_dnn, OnPolicyReplay
 
 class DeepSarsa(Agent):
     def __init__(self,
@@ -21,25 +21,40 @@ class DeepSarsa(Agent):
         self.loss_func = nn.MSELoss if loss_func is None else loss_func
         self.gamma = gamma
         self.epsilon = epsilon
-        self.batch_size = batch_size
+        self.onpolicy_replay = OnPolicyReplay(batch_size)
         self.device = device
         
-        self.transitions = []
-
     def update(self, transition: Transition) -> Any:
-        self.transitions.append(transition)
-        if len(self.transitions) == self.batch_size + 1:
-            loss = self.compute_td_error()
+        # if reached training frequency
+        if self.onpolicy_replay.is_full:
+            # sample from the onpolicy replay
+            prev_transitions = self.onpolicy_replay.sample()
+            # for the batch learning
+            current_states, current_actions, next_states, rewards, terminated_arr = (
+                Transition.to_tensor_batch(prev_transitions, self.device)
+            )
+            # get a next action from the next transition
+            next_actions = torch.cat(
+                [current_actions[1:], transition.to_tensor(self.device).current_action]
+            )
+            # compute td loss
+            loss = self.compute_td_loss(
+                current_states,
+                current_actions,
+                next_states,
+                next_actions,
+                rewards,
+                terminated_arr
+            )
             # backpropagation
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            # remove all transitions except for the last one
-            temp = self.transitions[-1]
-            self.transitions.clear()
-            self.transitions.append(temp)
             
-    def get_action(self, state) -> Any:
+        # add new transition
+        self.onpolicy_replay.add(transition)
+            
+    def get_action(self, state: torch.Tensor) -> Any:
         return epsilon_greedy_dnn(
             self.q_value_net,
             torch.FloatTensor(state, device=self.device),
@@ -47,15 +62,13 @@ class DeepSarsa(Agent):
             self.epsilon
         )
             
-    def compute_td_error(self):
-        # for the batch learning
-        current_states, current_actions, next_states, rewards, terminated_arr = (
-            Transition.to_tensor_batch(self.transitions[:-1], self.device)
-        )
-        # get a next action from the next transition
-        next_actions = torch.cat(
-            [current_actions[1:], self.transitions[-1].to_tensor(self.device)]
-        )
+    def compute_td_loss(self, 
+                        current_states: torch.Tensor, 
+                        current_actions: torch.Tensor, 
+                        next_states: torch.Tensor, 
+                        next_actions: torch.Tensor, 
+                        rewards: torch.Tensor, 
+                        terminated_arr: torch.Tensor):
         # estimate action values for the current state
         q_values = self.q_value_net(current_states)
         # estimate action values for the next state to compute a target of sarsa
@@ -73,8 +86,8 @@ class DeepSarsa(Agent):
             -1,
             next_actions.long().unsqueeze(-1)
         ).squeeze(-1)
-        # compute td error
+        # compute td loss
         td_target = rewards + self.gamma * (1 - terminated_arr) * next_q_value
-        td_error = self.loss_func(q_value, td_target)
+        td_loss = self.loss_func(q_value, td_target)
         
-        return td_error
+        return td_loss
