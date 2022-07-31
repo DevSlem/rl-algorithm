@@ -42,8 +42,6 @@ class Transition(NamedTuple):
     
     @staticmethod
     def to_tensor_batch(transitions: list[Transition], device: torch.device = None, requires_grad: bool = False):
-        transitions = [transition.to_tensor(device, requires_grad) for transition in transitions]
-        
         current_states = []
         current_actions = []
         next_states = []
@@ -57,9 +55,9 @@ class Transition(NamedTuple):
             rewards.append(transition.reward)
             terminated_arr.append(transition.terminated)
             
-        current_states = torch.stack(current_states)
-        current_actions = torch.stack(current_actions)
-        next_states = torch.stack(next_states)
+        current_states = torch.tensor(np.array(current_states), device=device, requires_grad=requires_grad)
+        current_actions = torch.stack(np.array(current_actions), device=device, requires_grad=requires_grad)
+        next_states = torch.tensor(np.array(next_states), device=device, requires_grad=requires_grad)
         rewards = torch.tensor(rewards, device=device, requires_grad=requires_grad)
         terminated_arr = torch.tensor(terminated_arr, device=device, requires_grad=requires_grad).int()
         

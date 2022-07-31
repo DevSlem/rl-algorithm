@@ -11,6 +11,7 @@ def epsilon_greedy(q_values, state: Tuple, action_count: int, epsilon = 0.1) -> 
         return np.random.randint(action_count)
     
 def epsilon_greedy_dnn(q_value_net: nn.Module, state: torch.Tensor, action_count: int, epsilon=0.1):
+    """ Get an action from epsilon greedy policy using dnn. """
     if np.random.rand() > epsilon:
         with torch.no_grad():
             q_values = q_value_net(state)
