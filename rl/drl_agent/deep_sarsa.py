@@ -24,6 +24,7 @@ class DeepSarsa(Agent):
         self.epsilon_decay = epsilon_decay
         self.gamma = gamma
         self.epsilon = epsilon_decay.step()
+        self.step = 0
         self.device = device
         
     def update(self, transition: Transition) -> Any:
@@ -53,7 +54,7 @@ class DeepSarsa(Agent):
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            
+            self.step += 1
             # set epsilon
             self.epsilon = self.epsilon_decay.step()
             
